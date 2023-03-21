@@ -1,11 +1,9 @@
-# parser_innopolis_v2.1
+# parser_innopolis_v2.5
 
 
-Установка виртуального окружения и пакетов для Linux
+Установка виртуального окружения и пакетов
 -------------------------
-1. python3 -m venv venv
-2. source venv/bin/activate
-3. pip3 install -r requirements.txt
+Запустить файл "first_step.bat". Он автоматически создаст окружение и подгрузит пакеты. После этого bat-файл можно удалять
 
 
 Запуск

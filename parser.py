@@ -17,6 +17,9 @@ load_dotenv()
 NAME = os.getenv('NAME')
 LOGIN = os.getenv('LOGIN')
 PASSWD = os.getenv('PASSWORD')
+if not (NAME and LOGIN and PASSWD):
+    exit('!!! Не заполненны данные для авторизации в файле .env !!!')
+
 IS_LOAD = True if os.getenv('IS_LOAD') == 'True' else False
 FULL_NAME = None
 
