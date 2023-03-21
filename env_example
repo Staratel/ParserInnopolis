@@ -1,0 +1,4 @@
+LOGIN=''    # Ваш логин на innopolis.ru
+PASSWORD='' # Ваш пароль на innopolis.ru
+NAME='' # Ваш фамилия, без имени и отчества
+IS_LOAD=False   # Скачивать ДЗ - True, иначе False
