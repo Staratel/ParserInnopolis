@@ -137,6 +137,10 @@ for training in trainings:
     keys = {}
 
     # Ищем в списке преподавателей свою фамилию и формируем словарь с id и фамилией
+    if NAME not in str(teachers):
+        print(f'Вас нет в списке преподавателей')
+        continue
+
     for teacher in teachers:
         teach_id = list(teacher.values())
 
