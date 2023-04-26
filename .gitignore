@@ -129,3 +129,5 @@ dmypy.json
 .pyre/
 status.txt
 .idea
+/EXCEL/
+/json/

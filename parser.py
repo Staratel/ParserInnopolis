@@ -11,6 +11,7 @@ from pathlib import Path
 from authorization import auth
 from dotenv import load_dotenv
 from requests.exceptions import ConnectionError
+from requests.models import PreparedRequest
 
 load_dotenv()
 
@@ -72,6 +73,33 @@ online = s.get(online_url)
 
 # Парсим страницу "Код будущего" для поиска url перехода на следующую страницу
 dom = html.fromstring(online.content).xpath(path)
+
+cards = []
+for card in dom:
+    card_url = card.xpath('a/@href')[0]
+    card_name = card.xpath(
+        "a/div[@class='card border-0 bg-white h-100 shadow rounded-lg p-0']"
+        "/div[@class='card-body p-4 h-100 d-flex flex-column']"
+        "/div[@class='card-title text-dark mb-4 row justify-content-between no-gutters flex-nowrap']/h5/text()")[0]
+    cards.append({card_name: base_url + card_url})
+
+print(f"\nУ вас {len(dom)} набора.")
+
+print('=' * 50)
+for i in range(len(cards)):
+    print(f'{i}. {list(cards[i].keys())[0].split()[0]}')
+print('=' * 50)
+if len(cards) != 1:
+    sel = int(input('Какой набор использовать? _ '))
+else:
+    sel = 0
+
+try:
+    get_card = list(cards[sel].values())[0]
+    card_names = list(cards[sel].keys())[0]
+except (IndexError,):
+    print('Нет такого набора.')
+    sys.exit()
 href = dom[0].xpath('a/@href')[0]
 
 # Формируем url для перехода на следующую страницу
@@ -124,6 +152,7 @@ get_card_url = base_url + get_list_card_url[0]  # Получаем ссылку 
 cards_id = [i.split("/")[3] for i in get_list_card_url]  # ID модулей
 trainings = [f'{trainings_url}/{i}' for i in cards_id]  # Ссылки на модули
 list_key = []  # Ключи от всех групп
+sel_group = -1  # Выбранная группа, если их несколько у преподавателя
 
 for training in trainings:
     get_trainings = f'{training}/groups'
@@ -151,15 +180,16 @@ for training in trainings:
 
     # Если на данном направлении несколько групп, разрешаем выбор необходимой группы
     if len(keys) > 1:
-        print(f"\nУ вас {len(keys)} группы в данном модуле.")
-        print('=' * 50)
+        if sel_group == -1:
+            print(f"\nУ вас {len(keys)} группы в данном модуле.")
+            print('=' * 50)
 
-        for i, item in enumerate(keys.keys()):
-            print(f'{i} - {item}')
+            for i, item in enumerate(keys.keys()):
+                print(f'{i} - {item}')
 
-        print('=' * 50)
+            print('=' * 50)
 
-        sel_group = int(input('Какую группу использовать? _ '))
+            sel_group = int(input('Какую группу использовать? _ '))
         try:
             key = list(keys.values())[sel_group]
             FULL_NAME = list(keys.keys())[sel_group]
@@ -201,6 +231,12 @@ for i in s.get(f'https://learn.innopolis.university/api/instructors/trainings').
 
 themes = []
 for card_id, key in dict_key_card.items():
+
+    resp = s.get('https://learn.innopolis.university/Instructors/Trainings/' + card_id)
+    dom = html.fromstring(resp.content).xpath('//*[@id="training-Progress"]/@href')
+    print('Ссылка на таблицу:\nhttps://learn.innopolis.university' + dom[0])
+
+    pending_verification_temp = 0  # Временное кол-во домашних работ
     print(f'Получаем данные от "{d_module[card_id]}"')
     data_param = {  # Параметры для запроса
         'start': 0,
@@ -229,7 +265,7 @@ for card_id, key in dict_key_card.items():
     # ========================================================
     #      Парсим json и формируем журнал в формате xlsx
     # ========================================================
-    print('Parsing.. Формируем журнал.\n')
+    print('Parsing.. Формируем журнал.')
     data = response.json().get('data')
 
     columns = [i for i in range(1, len(data[0].get('exercises')) + 1)]
@@ -266,8 +302,10 @@ for card_id, key in dict_key_card.items():
                             archive.extractall(files_path)
                         print(f'{student_name}: ДЗ №{pos} загружено.')
                     val.append('?')
+                    pending_verification_temp += 1
                     pending_verification += 1
         values.append(val)
+    print(f'Кол-во работ в этом модуле ожидающих проверку: {pending_verification_temp}\n')
 
     percent_verified = f'{(verified * 100) / count_homework:.2f}'
 
