@@ -100,7 +100,7 @@ try:
 except (IndexError,):
     print('Нет такого набора.')
     sys.exit()
-href = dom[0].xpath('a/@href')[0]
+href = dom[sel].xpath('a/@href')[0]
 
 # Формируем url для перехода на следующую страницу
 course_url = base_url + href
@@ -208,6 +208,9 @@ for training in trainings:
         sys.exit()
 
     list_key.append(key)  # Добавление ключа
+
+if not list_key:  # Если преподавателя нигде нет - выход
+    exit()
 
 dict_key_card = dict(zip(cards_id, list_key))  # Словарь модулей и ключей
 
