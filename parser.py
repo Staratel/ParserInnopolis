@@ -256,7 +256,7 @@ for card_id, key in dict_key_card.items():
             themes.append(f'{theme_number}. {theme_title.replace(" Домашнее задание", "").replace("..", ".")}')
 
         training = f'{trainings_url}/{card_id}'
-        response = s.post(f'{training}/ProgressLightweight', params=data_param)
+        response = s.post(f'{training}/ProgressLightweight/Old', params=data_param)
         seconds = response.elapsed.total_seconds()
         print(f'Parsing.. Ответ получен за {seconds} сек.')
     except ConnectionError:
